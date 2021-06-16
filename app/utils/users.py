@@ -4,7 +4,17 @@ from app.core.config import settings
 db = Database(settings)
 
 
-def get_users():
+def add_user(name,email,password,login_type):
+    query = f"""
+        insert into users(name,email,password,login_type) values (%s, %s, %s, %s)
+    """
+    db.connect()
+    result = db.insert_row(query,(name,email,password,login_type))
+
+    return result
+    
+
+def get_user():
     query = f"""
     SELECT * 
     FROM prueba

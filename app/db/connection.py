@@ -36,3 +36,11 @@ class Database:
             records = [row for row in cur.fetchall()]
             cur.close()
             return records
+    
+    def insert_row(self,query,user):
+        """ Run a SQL query to insert a row."""
+        with self.conn.cursor() as cur:
+            cur.execute(query,user)
+            self.conn.commit()
+            cur.close()
+        return "User added"

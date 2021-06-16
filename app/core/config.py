@@ -7,7 +7,7 @@ load_dotenv(dotenv_path=env_path)
 
 
 class Settings:
-    PROJECT_TITLE: str = "Enki-Backend"
+    PROJECT_TITLE: str = "Ogma"
     PROJECT_VERSION: str = "0.1.0"
 
     POSTGRES_USER: str = os.getenv("POSTGRES_USER")

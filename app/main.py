@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
 
-from app.utils.users import get_users
+import bcrypt
+
+from app.core.config import settings
+from app.utils.users import get_user, add_user
 
 app = FastAPI(title=settings.PROJECT_TITLE, version=settings.PROJECT_VERSION)
 
@@ -23,9 +25,14 @@ app.add_middleware(
 )
 
 
-@app.get("/users")
-async def GET_contracts():
+@app.post("/users/create")
+async def POST_users(   
+    name: str,
+    email: str,
+    password: str,  
+    login_type: str,
+):
+    hashed = bcrypt.hashpw(bytes(password, encoding='utf-8'),bcrypt.gensalt())
+    messege = add_user(name,email,hashed.decode("utf-8"),login_type)
 
-    users = get_users()
-
-    return {"response": users}
+    return {"response": messege}
