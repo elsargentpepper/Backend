@@ -31,11 +31,15 @@ class Database:
 
     def select_rows(self, query):
         """Run a SQL query to select rows from table."""
-        with self.conn.cursor() as cur:
-            cur.execute(query)
-            records = [row for row in cur.fetchall()]
-            cur.close()
-            return records
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(query)
+                records = [row for row in cur.fetchall()]
+                cur.close()
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=400, detail="Information given was invalid")        
+        return records
     
     def insert_row(self,query,user):
         """ Run a SQL query to insert a row."""
@@ -46,5 +50,5 @@ class Database:
                 cur.close()
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=400, detail="Information created a conflict")
+            raise HTTPException(status_code=400, detail="Information given was invalid")
         return "User added"

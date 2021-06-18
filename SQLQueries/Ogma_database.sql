@@ -12,7 +12,7 @@ CREATE TABLE questions(
     image varchar(200),
     level integer references levels(levels_id),
     technology integer references technologies(technologies_id),
-    question text UNIQUE);   
+    question text );   
 
 CREATE TABLE users(
     users_id SERIAL PRIMARY KEY,
@@ -38,3 +38,12 @@ INSERT INTO questions(answers,image,level,technology,question) VALUES(
     1,
     'What will be the output of the following JavaScript code?'
 );
+
+
+SELECT (question,answers,image) 
+FROM questions as q
+INNER JOIN  technologies as t
+ON q.technology = t.technologies_id
+INNER JOIN levels as l
+on q.level = l.levels_id
+WHERE t.name = AND l.name =
