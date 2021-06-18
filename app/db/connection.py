@@ -43,12 +43,16 @@ class Database:
     
     def insert_row(self,query,user):
         """ Run a SQL query to insert a row."""
-        try:
-            with self.conn.cursor() as cur:
+        
+        with self.conn.cursor() as cur:
+            try:
                 cur.execute(query,user)
                 self.conn.commit()
                 cur.close()
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=400, detail="Information given was invalid")
+            except Exception as e:
+                print(e)
+                cur.execute("ROLLBACK")
+                self.conn.commit()
+                cur.close()
+                raise HTTPException(status_code=400, detail="Information given was invalid")
         return "User added"
