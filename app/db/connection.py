@@ -1,5 +1,5 @@
 import psycopg2
-
+from fastapi import HTTPException
 
 class Database:
     """PostgreSQL Database class."""
@@ -39,8 +39,12 @@ class Database:
     
     def insert_row(self,query,user):
         """ Run a SQL query to insert a row."""
-        with self.conn.cursor() as cur:
-            cur.execute(query,user)
-            self.conn.commit()
-            cur.close()
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(query,user)
+                self.conn.commit()
+                cur.close()
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=400, detail="Information created a conflict")
         return "User added"

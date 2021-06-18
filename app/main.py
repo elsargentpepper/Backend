@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 import bcrypt
 
@@ -24,15 +25,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class User(BaseModel):
+        name: str
+        email: str
+        password: str
+        login_type: str
+        username: str
+
 
 @app.post("/users/create")
-async def POST_users(   
-    name: str,
-    email: str,
-    password: str,  
-    login_type: str,
-):
-    hashed = bcrypt.hashpw(bytes(password, encoding='utf-8'),bcrypt.gensalt())
-    messege = add_user(name,email,hashed.decode("utf-8"),login_type)
+async def POST_users(user: User):
+    hashed = bcrypt.hashpw(bytes(user.password, encoding='utf-8'),bcrypt.gensalt()) # THIS NEEDS TO BE A FUNCTION SOMEWHERE ELSE
+    messege = add_user(user.name,user.email,hashed.decode("utf-8"),user.login_type,user.username)
 
     return {"response": messege}
+
+
+@app.get("/user")
+async def GET_users(   
+    username: str ,
+):
+    
+
+    return {"response": "messege"}
