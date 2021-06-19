@@ -7,7 +7,7 @@ import bcrypt
 
 from app.core.config import settings
 
-from app.utils.users import get_user, add_user, get_all_users, get_questions
+from app.utils.users import get_user, add_user, get_all_users, get_questions, update_user, delete_user
 from app.utils.questions_formating import questions_formating
 
 app = FastAPI(title=settings.PROJECT_TITLE, version=settings.PROJECT_VERSION)
@@ -65,6 +65,25 @@ async def GET_users():
     user = get_all_users()
 
     return {"response": user}
+
+
+
+@app.put("/user/edit")
+async def UPDATE_user(user: Users):
+
+    messege = update_user(user.name, user.password, user.login_type, user.username, user.email)
+
+    return {"response": messege}
+
+
+
+@app.delete("/user/delete")
+async def DELETE_user(user: Users):
+
+    messege = delete_user(user.email, user.username,)
+
+    return {"response": messege}
+
 
 
 @app.get("/questions")

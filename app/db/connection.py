@@ -31,22 +31,26 @@ class Database:
 
     def select_rows(self, query):
         """Run a SQL query to select rows from table."""
-        try:
-            with self.conn.cursor() as cur:
+        
+        with self.conn.cursor() as cur:
+            try:
                 cur.execute(query)
                 records = [row for row in cur.fetchall()]
                 cur.close()
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=400, detail="Information given was invalid")        
+            except Exception as e:
+                print(e)
+                cur.execute("ROLLBACK")
+                self.conn.commit()
+                cur.close()
+                raise HTTPException(status_code=400, detail="Information given was invalid")        
         return records
     
-    def insert_row(self,query,user):
+    def insert_row(self,query,info):
         """ Run a SQL query to insert a row."""
         
         with self.conn.cursor() as cur:
             try:
-                cur.execute(query,user)
+                cur.execute(query,info)
                 self.conn.commit()
                 cur.close()
             except Exception as e:
@@ -56,3 +60,37 @@ class Database:
                 cur.close()
                 raise HTTPException(status_code=400, detail="Information given was invalid")
         return "User added"
+
+
+    def update_row(self,query,info):
+        """ Run a SQL query to update a row."""
+        
+        with self.conn.cursor() as cur:
+            try:
+                cur.execute(query,info)
+                self.conn.commit()
+                cur.close()
+            except Exception as e:
+                print(e)
+                cur.execute("ROLLBACK")
+                self.conn.commit()
+                cur.close()
+                raise HTTPException(status_code=400, detail="Information given was invalid")
+        return "User updated"
+
+
+    def delete_row(self,query,info):
+        """ Run a SQL query to delete a row."""
+        
+        with self.conn.cursor() as cur:
+            try:
+                cur.execute(query,info)
+                self.conn.commit()
+                cur.close()
+            except Exception as e:
+                print(e)
+                cur.execute("ROLLBACK")
+                self.conn.commit()
+                cur.close()
+                raise HTTPException(status_code=400, detail="Information given was invalid")
+        return "User delete"
