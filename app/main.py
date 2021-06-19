@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
+from typing import List, Optional
 from pydantic import BaseModel
 
 import bcrypt
@@ -9,6 +10,7 @@ from app.core.config import settings
 
 from app.utils.users import get_user, add_user, get_all_users, get_questions, update_user, delete_user
 from app.utils.questions_formating import questions_formating
+from app.utils.users_formating import user_format,users_format
 
 app = FastAPI(title=settings.PROJECT_TITLE, version=settings.PROJECT_VERSION)
 
@@ -28,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-### THIS CLASS NEED TO BE IN A DIFFERENT FILE MY DUDE
+### THIS CLASSES NEED TO BE IN A DIFFERENT FILE MY DUDE
 
 class Users(BaseModel):
         name: str
@@ -36,7 +38,8 @@ class Users(BaseModel):
         password: str
         login_type: str
         username: str
-
+        badges: Optional[List] = None
+        prefered_technologies: Optional[List] = None
 
 
 @app.post("/users/create")
@@ -54,24 +57,24 @@ async def POST_users(user: Users):
 async def GET_user( username: str ):
 
     user = get_user(username)
-
-    return {"response": user}
+    response = user_format(user[0])
+    return {"response": response}
 
 
 
 @app.get("/users")
 async def GET_users():
 
-    user = get_all_users()
-
-    return {"response": user}
+    users = get_all_users()
+    response = users_format(users)
+    return {"response": response}
 
 
 
 @app.put("/user/edit")
 async def UPDATE_user(user: Users):
 
-    messege = update_user(user.name, user.password, user.login_type, user.username, user.email)
+    messege = update_user(user.name, user.password, user.login_type, user.username, user.email, user.badges, user.prefered_technologies)
 
     return {"response": messege}
 

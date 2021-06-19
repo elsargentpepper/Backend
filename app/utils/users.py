@@ -62,19 +62,21 @@ def add_user(name,email,password,login_type,username):
 
 
 
-def update_user(name,password,login_type,username,email):
+def update_user(name,password,login_type,username,email,badges,pt):
 
     query = f"""
     UPDATE users
     SET name = %s,
         password = %s,
         login_type = %s,
-        username = %s
+        username = %s,
+        badges = %s,
+        prefered_technologies = %s
     WHERE email = %s
     """
 
     db.connect()
-    result = db.update_row(query,(name,password,login_type,username,email))
+    result = db.update_row(query,(name,password,login_type,username,badges,pt,email))
 
     return result
 
