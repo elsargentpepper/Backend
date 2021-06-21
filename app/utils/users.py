@@ -33,13 +33,26 @@ def get_all_users():
 def get_questions(technology,level):
 
     query = f"""
-    SELECT q.question,q.answers,q.image
+    SELECT q.question,q.answers,q.image,q.right_answer
     FROM questions as q
     INNER JOIN  technologies as t
     ON q.technology = t.technologies_id
     INNER JOIN levels as l
     on q.level = l.levels_id
     WHERE t.name = '{technology}' AND l.name = '{level}'
+    """
+
+    db.connect()
+    result = db.select_rows(query)
+    return result
+
+
+
+def get_all_questions_tech(tech_id):
+    query = f"""
+    SELECT *
+    FROM questions 
+    WHERE technology = {tech_id}
     """
 
     db.connect()
@@ -227,4 +240,19 @@ def add_questions(question):
                             question.technology,
                             question.question,
                             question.right_answer))
+    return result
+
+
+def get_progress(user):
+
+    query = f"""
+    SELECT p.percentage, t.name 
+    FROM progress as p 
+    JOIN technologies as t
+    ON p.technology = t.technologies_id
+    WHERE p.user_id = {user['id']} 
+    """
+
+    db.connect()
+    result = db.select_rows(query)
     return result
