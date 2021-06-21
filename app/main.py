@@ -78,6 +78,9 @@ async def GET_user( username: str ):
 
     user = get_user(username)
 
+    if len(user) < 1:
+        raise HTTPException(status_code=400, detail="Sorry this user does not exist")
+    
     response = user_format(user[0])
 
     return {"response": response}
