@@ -19,5 +19,6 @@ class Settings:
     CLIENT: str = os.getenv("CLIENT")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT")
 
+    QUESTIONS_PASSWORD: str = os.getenv("QUESTIONS_PASSWORD")
 
 settings = Settings()

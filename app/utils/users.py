@@ -209,3 +209,22 @@ def get_technology_name(technology_id):
     db.connect()
     result = db.select_rows(query)
     return result[0][0]
+
+
+def add_questions(question):
+
+    query = f"""
+    INSERT INTO questions(answers,image,level,technology,question,right_answer)
+    VALUES (
+        %s,%s,%s, %s, %s, %s
+    )
+    """
+
+    db.connect()
+    result = db.insert_row(query,(question.answers,
+                            question.image,
+                            question.level,
+                            question.technology,
+                            question.question,
+                            question.right_answer))
+    return result

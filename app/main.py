@@ -8,8 +8,8 @@ import bcrypt
 
 from app.core.config import settings
 
-from app.utils.users import get_user, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress
-from app.utils.questions_formating import questions_formating
+from app.utils.users import get_user, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions
+from app.utils.questions_formating import questions_formating,add_format_question
 from app.utils.users_formating import user_format,users_format
 from app.utils.progress_formating import progresses_format
 from app.utils.badge_identification import badge_identification
@@ -50,6 +50,15 @@ class Progress(BaseModel):
     percentage: int
     user: Users
     technology: Technology
+
+class Questions(BaseModel):
+    answers: List[str]
+    image: str
+    level: int
+    technology: int
+    question: str
+    right_answer: str
+    password: str
 
 
 
@@ -209,4 +218,17 @@ async def UPDATE_user_update_progress(
                         user_updated["prefered_technologies"])
 
     return {"response": user_updated}
+
+
+
+@app.post("/questions/add")
+async def POST_questions(question: Questions):
+
+    if question.password != settings.QUESTIONS_PASSWORD:
+        raise HTTPException(status_code=401, detail="Authorization denied")
+
+    question_formated = add_format_question(question)
     
+    add_questions(question_formated)
+    
+    return {"response": question_formated}
