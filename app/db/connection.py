@@ -59,7 +59,7 @@ class Database:
                 self.conn.commit()
                 cur.close()
                 raise HTTPException(status_code=400, detail="Information given was invalid")
-        return "User added"
+        return "Row added"
 
 
     def update_row(self,query,info):
@@ -76,7 +76,7 @@ class Database:
                 self.conn.commit()
                 cur.close()
                 raise HTTPException(status_code=400, detail="Information given was invalid")
-        return "User updated"
+        return "Row updated"
 
 
     def delete_row(self,query,info):
@@ -93,4 +93,4 @@ class Database:
                 self.conn.commit()
                 cur.close()
                 raise HTTPException(status_code=400, detail="Information given was invalid")
-        return "User delete"
+        return "Row delete"
