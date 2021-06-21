@@ -144,7 +144,7 @@ async def POST_user_technology_add(
 
     add_user_progress(technology.name,user_to_update['id'])
     
-    return {"response": "Technology added"}
+    return {"response": user_to_update}
 
 
 
@@ -173,7 +173,7 @@ async def DELETE_user_technology_remove(
     
     remove_user_progress(technology.name,user_to_update['id'])
 
-    return {"response": "Technology removed"}
+    return {"response": user_to_update}
 
 
 
