@@ -271,3 +271,15 @@ def get_progress(user):
     db.connect()
     result = db.select_rows(query)
     return result
+
+
+
+def get_all_technologies():
+    query = f"""
+    SELECT * 
+    FROM technologies
+    """
+
+    db.connect()
+    result = db.select_rows(query)
+    return result

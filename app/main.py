@@ -8,12 +8,13 @@ import bcrypt
 
 from app.core.config import settings
 
-from app.utils.users import get_user_by_username, get_user_by_email, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress
+from app.utils.users import get_user_by_username, get_user_by_email, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress,get_all_technologies
 from app.utils.questions_formating import questions_formating,add_format_question
 from app.utils.users_formating import user_format,users_format
 from app.utils.progress_formating import progresses_format,progress_percentage_formating
 from app.utils.badge_identification import badge_identification
 from app.utils.question_validation import question_validation
+from app.utils.technologies_formating import technologies_formating
 
 app = FastAPI(title=settings.PROJECT_TITLE, version=settings.PROJECT_VERSION)
 
@@ -38,7 +39,7 @@ app.add_middleware(
 class Users(BaseModel):
     name: str
     email: str
-    password: str
+    password: Optional[str] = None
     login_type: str
     username: str
     badges: Optional[List] = None
@@ -255,7 +256,7 @@ async def POST_questions(question: Questions):
 
 
 @app.get("/user/progress")
-async def GET_user( username: str ):
+async def GET_user_progress( username: str ):
 
     user = get_user_by_username(username)
 
@@ -270,5 +271,17 @@ async def GET_user( username: str ):
         raise HTTPException(status_code=400, detail="Sorry this user does not have any progress")
 
     response = progress_percentage_formating(progresses)
+    
+    return response
+
+
+
+@app.get("/technologies")
+async def GET_technologies():
+
+    info = get_all_technologies()
+
+    response = technologies_formating(info)    
+
     
     return response
