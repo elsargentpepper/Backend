@@ -3,12 +3,26 @@ from app.core.config import settings
 
 db = Database(settings)
 
-def get_user(username):
+def get_user_by_username(username):
 
     query = f"""
     SELECT * 
     FROM users 
     WHERE username = '{username}' 
+    """
+
+    db.connect()
+    result = db.select_rows(query)
+    return result
+
+
+
+def get_user_by_email(email):
+
+    query = f"""
+    SELECT * 
+    FROM users 
+    WHERE email = '{email}' 
     """
 
     db.connect()

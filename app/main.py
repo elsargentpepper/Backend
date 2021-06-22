@@ -8,7 +8,7 @@ import bcrypt
 
 from app.core.config import settings
 
-from app.utils.users import get_user, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress
+from app.utils.users import get_user_by_username, get_user_by_email, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress
 from app.utils.questions_formating import questions_formating,add_format_question
 from app.utils.users_formating import user_format,users_format
 from app.utils.progress_formating import progresses_format,progress_percentage_formating
@@ -75,9 +75,18 @@ async def POST_users(user: Users):
 
 
 @app.get("/user")
-async def GET_user( username: str ):
+async def GET_user( username: str=None,
+                    email: str=None
+ ):
 
-    user = get_user(username)
+    if username != None and email == None:
+        user = get_user_by_username(username)
+
+    elif email != None and username == None:
+        user = get_user_by_email(email)
+        
+    else:
+        raise HTTPException(status_code=400, detail="Please only send either email or username")
 
     if len(user) < 1:
         raise HTTPException(status_code=400, detail="Sorry this user does not exist")
