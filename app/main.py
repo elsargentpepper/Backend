@@ -256,6 +256,9 @@ async def GET_user( username: str ):
 
     progresses = get_progress(user_formated)
 
+    if len(progresses) < 1:
+        raise HTTPException(status_code=400, detail="Sorry this user does not have any progress")
+
     response = progress_percentage_formating(progresses)
     
     return response
