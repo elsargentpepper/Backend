@@ -99,6 +99,7 @@ def update_user(name,password,login_type,username,email,badges,pt):
         username = %s,
         badges = %s,
         prefered_technologies = %s
+        
     WHERE email = %s
     """
 

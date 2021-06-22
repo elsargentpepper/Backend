@@ -43,6 +43,7 @@ class Users(BaseModel):
     username: str
     badges: Optional[List] = None
     prefered_technologies: Optional[List] = None
+    profile_pic: Optional[str] = ""
 
 class Technology(BaseModel):
     name: str
@@ -109,7 +110,7 @@ async def GET_users():
 @app.put("/user/edit")
 async def UPDATE_user(user: Users):
 
-    update_user(user.name, user.password, user.login_type, user.username, user.email, user.badges, user.prefered_technologies)
+    update_user(user.name, user.password, user.login_type, user.username, user.email, user.badges, user.prefered_technologies, user.profile_pic)
 
     return {"response": "User updated"}
 
@@ -147,7 +148,7 @@ async def POST_user_technology_add(
     technology: Technology
     ):
 
-    users = get_user(user.username)
+    users = get_user_by_username(user.username)
 
     user_to_update = user_format(users[0])
 
@@ -176,7 +177,7 @@ async def DELETE_user_technology_remove(
     technology: Technology
     ):
 
-    users = get_user(user.username)
+    users = get_user_by_username(user.username)
 
     user_to_update = user_format(users[0])
 
@@ -204,7 +205,7 @@ async def UPDATE_user_update_progress(
     progress: Progress
     ):
     
-    user_info = get_user(progress.user.username)
+    user_info = get_user_by_username(progress.user.username)
     user = user_format(user_info[0])
     user_id = user["id"]
 
@@ -256,7 +257,7 @@ async def POST_questions(question: Questions):
 @app.get("/user/progress")
 async def GET_user( username: str ):
 
-    user = get_user(username)
+    user = get_user_by_username(username)
 
     if len(user) < 1:
         raise HTTPException(status_code=400, detail="Sorry this user does not exist")
