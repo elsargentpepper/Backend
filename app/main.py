@@ -38,11 +38,11 @@ app.add_middleware(
 ### THIS CLASSES NEED TO BE IN A DIFFERENT FILE MY DUDE
 
 class Users(BaseModel):
-    name: str
-    email: str
+    name: Optional[str]
+    email: Optional[str]
     password: Optional[str] = None
-    login_type: str
-    username: str
+    login_type: Optional[str]
+    username: Optional[str]
     badges: Optional[List] = None
     prefered_technologies: Optional[List] = None
     profile_pic: Optional[str] = ""
