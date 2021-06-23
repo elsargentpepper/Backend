@@ -15,13 +15,15 @@ def questions_formating(questions,number_of_questions):
         json_response['questions'].append(json)
     return json_response
 
-def add_format_question(question):
+def check_question(questions):
 
-    for i in range(0,len(question.answers)):
-        question.answers[i] = question.answers[i].replace("'","''")
+    for question in questions['questions']:
 
-    question.question = question.question.replace("'","''")
+        for i in range(0,len(question['answers'])):
+            question['answers'][i] = question['answers'][i].replace("''","'")
 
-    question.right_answer.replace("'","''")
+        question["question"]= question["question"].replace("''","'")
 
-    return question
+        
+
+    return questions

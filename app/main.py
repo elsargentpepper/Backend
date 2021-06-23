@@ -8,13 +8,14 @@ import bcrypt
 
 from app.core.config import settings
 
-from app.utils.users import get_user_by_username, get_user_by_email, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress,get_all_technologies
-from app.utils.questions_formating import questions_formating,add_format_question
+from app.utils.users import get_all_levels, get_user_by_username, get_user_by_email, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress,get_all_technologies,get_all_levels
+from app.utils.questions_formating import questions_formating,check_question
 from app.utils.users_formating import user_format,users_format
 from app.utils.progress_formating import progresses_format,progress_percentage_formating
 from app.utils.badge_identification import badge_identification
 from app.utils.question_validation import question_validation
 from app.utils.technologies_formating import technologies_formating
+from app.utils.levels_formating import levels_formating
 
 app = FastAPI(title=settings.PROJECT_TITLE, version=settings.PROJECT_VERSION)
 
@@ -139,6 +140,7 @@ async def GET_questions(
         raise HTTPException(status_code=400, detail="Sorry we don't have that many questions of this specific type")  
 
     response = questions_formating(questions,number_of_questions)
+    response = check_question(response)
     return {"response": response}
 
 
@@ -242,16 +244,15 @@ async def POST_questions(question: Questions):
     if question.password != settings.QUESTIONS_PASSWORD:
         raise HTTPException(status_code=401, detail="Authorization denied")
 
-    question_formated = add_format_question(question)
 
-    valid = question_validation(question_formated)
+    valid = question_validation(question)
     if valid:
         raise HTTPException(status_code=400, detail="This question all ready exist in out data base")
 
     
-    add_questions(question_formated)
+    add_questions(question)
     
-    return {"response": question_formated}
+    return {"response": question}
 
 
 
@@ -285,3 +286,15 @@ async def GET_technologies():
 
     
     return response
+
+
+
+@app.get("/levels")
+async def GET_levels():
+
+    info = get_all_levels()
+
+    response = levels_formating(info)    
+
+    
+    return response    

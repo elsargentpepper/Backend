@@ -283,3 +283,14 @@ def get_all_technologies():
     db.connect()
     result = db.select_rows(query)
     return result
+
+
+def get_all_levels():
+    query = f"""
+    SELECT name 
+    FROM levels
+    """
+
+    db.connect()
+    result = db.select_rows(query)
+    return result
