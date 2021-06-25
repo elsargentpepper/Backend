@@ -46,9 +46,10 @@ def get_all_questions_tech(tech_id):
     SELECT *
     FROM questions
     WHERE technology = {tech_id}
-    )
+    
     """
-
+    
     db.connect()
+    
     result = db.select_rows(query)
     return result

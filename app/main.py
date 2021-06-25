@@ -283,17 +283,18 @@ async def update_user_update_progress(
 
 
 @app.post("/questions/add")
-async def post_questions(question: Questions):
+async def post_questions(question: Questions):   
 
     if question.password != settings.QUESTIONS_PASSWORD:
         raise HTTPException(status_code=401, detail="Authorization denied")
 
-
+    
     valid = question_validation(question)
+
     if valid:
         raise HTTPException(status_code=400, detail="This question all ready exist in out data base")
 
-    
+     
     Questions_conn.add_questions(question)
     
     return {"response": question}
