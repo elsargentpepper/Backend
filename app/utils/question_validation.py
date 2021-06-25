@@ -1,4 +1,4 @@
-from app.utils.users import get_all_questions_tech
+from app.utils.connections.questions import get_all_questions_tech
 
 def question_validation(question_given):
     questions = get_all_questions_tech(question_given.technology)

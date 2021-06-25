@@ -1,16 +1,21 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
+
 from typing import List, Optional
 from pydantic import BaseModel
-
 import bcrypt
 
 from app.core.config import settings
 
-from app.utils.users import get_all_levels, get_user_by_username, get_user_by_email, add_user, get_all_users, get_questions, update_user, delete_user,add_user_progress,remove_user_progress,update_user_progress,get_user_progress_by_tech,get_user_progress,add_questions,get_progress,get_all_technologies,get_all_levels
+import app.utils.connections.users as User_conn
+import app.utils.connections.levels as Level_conn
+import app.utils.connections.progress as Progresses_conn
+import app.utils.connections.questions as Questions_conn
+import app.utils.connections.technologies as Tech_conn
+
 from app.utils.questions_formating import questions_formating,check_question
-from app.utils.users_formating import user_format,users_format
+from app.utils.users_formating import user_format,users_format,user_format_body
 from app.utils.progress_formating import progresses_format,progress_percentage_formating
 from app.utils.badge_identification import badge_identification
 from app.utils.question_validation import question_validation
@@ -67,26 +72,26 @@ class Questions(BaseModel):
 
 
 @app.post("/users/create")
-async def POST_users(user: Users):
+async def post_users(user: Users):
 
     hashed = bcrypt.hashpw(bytes(user.password, encoding='utf-8'),bcrypt.gensalt()) # THIS NEEDS TO BE A FUNCTION SOMEWHERE ELSE
 
-    add_user(user.name,user.email,hashed.decode("utf-8"),user.login_type,user.username)
+    User_conn.add_user(user.name,user.email,hashed.decode("utf-8"),user.login_type,user.username)
 
     return {"response": "User created"}
 
 
 
 @app.get("/user")
-async def GET_user( username: str=None,
+async def get_user( username: str=None,
                     email: str=None
  ):
 
     if username != None and email == None:
-        user = get_user_by_username(username)
+        user = User_conn.get_user_by_username(username)
 
     elif email != None and username == None:
-        user = get_user_by_email(email)
+        user = User_conn.get_user_by_email(email)
         
     else:
         raise HTTPException(status_code=400, detail="Please only send either email or username")
@@ -101,40 +106,64 @@ async def GET_user( username: str=None,
 
 
 @app.get("/users")
-async def GET_users():
+async def get_users():
 
-    users = get_all_users()
+    users = User_conn.get_all_users()
     response = users_format(users)
     return {"response": response}
 
 
 
 @app.put("/user/edit")
-async def UPDATE_user(user: Users):
+async def update_user(user: Users):
 
-    update_user(user.name, user.password, user.login_type, user.username, user.email, user.badges, user.prefered_technologies, user.profile_pic)
+    info = User_conn.get_user_by_username(user.username)
+
+    if info[0] == None:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    original_user = user_format(info[0])
+
+    user_updated = dict()
+    user_updated["id"] = original_user["id"]
+    user_updated["name"] = user.name or original_user["name"]
+    user_updated["password"] = user.password or original_user["password"]
+    user_updated["login_type"] = user.login_type or original_user["login_type"]
+    user_updated["username"] = user.username or original_user["username"]
+    user_updated["email"] = user.email or original_user["email"]
+    user_updated["badges"] = user.badges or original_user["badges"]
+    user_updated["prefered_technologies"] = user.prefered_technologies or original_user["prefered_technologies"]
+    user_updated["profile_pic"] = user.profile_pic or original_user["profile_pic"]
+    User_conn.update_user(user_updated)
 
     return {"response": "User updated"}
 
 
 
 @app.delete("/user/delete")
-async def DELETE_user(user: Users):
+async def delete_user(user: Users):
 
-    delete_user(user.email, user.username,)
+    info = User_conn.get_user_by_username(user.username)
+
+    if info[0] == None:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    original_user = user_format(info[0])
+
+    User_conn.delete_user(original_user)
 
     return {"response": "User delete"}
 
 
 
 @app.get("/questions")
-async def GET_questions(
+async def get_questions(
     technology: str,
     level: str,
     number_of_questions: int = 5,
 ):
 
-    questions = get_questions(technology,level)
+    questions = Questions_conn.get_questions(technology,level)
 
     if len(questions) < number_of_questions:
         raise HTTPException(status_code=400, detail="Sorry we don't have that many questions of this specific type")  
@@ -146,41 +175,52 @@ async def GET_questions(
 
 
 @app.post("/user/technology/add")
-async def POST_user_technology_add(
+async def post_user_technology_add(
     user: Users,
     technology: Technology
     ):
 
-    users = get_user_by_username(user.username)
+    users = User_conn.get_user_by_username(user.username)
+
+    if users[0] == None:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
     user_to_update = user_format(users[0])
 
-    if technology.name in user_to_update["prefered_technologies"]:
+    if user_to_update["prefered_technologies"] != None and technology.name in user_to_update["prefered_technologies"]: 
         raise HTTPException(status_code=400, detail="Sorry you can not add the same to technology twice")
 
     user_to_update["prefered_technologies"].append(technology.name)
 
-    update_user(user_to_update["name"],
-                user_to_update["password"], 
-                user_to_update["login_type"], 
-                user_to_update["username"], 
-                user_to_update["email"], 
-                user_to_update["badges"], 
-                user_to_update["prefered_technologies"])
+    user_updated = dict()
+    user_updated["id"] = user_to_update["id"]
+    user_updated["name"] = user.name or user_to_update["name"]
+    user_updated["password"] = user.password or user_to_update["password"]
+    user_updated["login_type"] = user.login_type or user_to_update["login_type"]
+    user_updated["username"] = user.username or user_to_update["username"]
+    user_updated["email"] = user.email or user_to_update["email"]
+    user_updated["badges"] = user.badges or user_to_update["badges"]
+    user_updated["prefered_technologies"] = user.prefered_technologies or user_to_update["prefered_technologies"]
+    user_updated["profile_pic"] = user.profile_pic or user_to_update["profile_pic"]
 
-    add_user_progress(technology.name,user_to_update['id'])
+    User_conn.update_user(user_updated)
+
+    Progresses_conn.add_user_progress(technology.name,user_to_update['id'])
     
-    return {"response": user_to_update}
+    return {"response": user_updated}
 
 
 
 @app.delete("/user/technology/remove")
-async def DELETE_user_technology_remove(
+async def delete_user_technology_remove(
     user: Users,
     technology: Technology
     ):
 
-    users = get_user_by_username(user.username)
+    users = User_conn.get_user_by_username(user.username)
+
+    if users[0] == None:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
     user_to_update = user_format(users[0])
 
@@ -189,57 +229,61 @@ async def DELETE_user_technology_remove(
 
     user_to_update["prefered_technologies"].remove(technology.name)
 
-    update_user(user_to_update["name"],
-                user_to_update["password"], 
-                user_to_update["login_type"], 
-                user_to_update["username"], 
-                user_to_update["email"], 
-                user_to_update["badges"], 
-                user_to_update["prefered_technologies"])
-    
-    remove_user_progress(technology.name,user_to_update['id'])
+    user_updated = dict()
+    user_updated["id"] = user_to_update["id"]
+    user_updated["name"] = user.name or user_to_update["name"]
+    user_updated["password"] = user.password or user_to_update["password"]
+    user_updated["login_type"] = user.login_type or user_to_update["login_type"]
+    user_updated["username"] = user.username or user_to_update["username"]
+    user_updated["email"] = user.email or user_to_update["email"]
+    user_updated["badges"] = user.badges or user_to_update["badges"]
+    user_updated["prefered_technologies"] = user.prefered_technologies or user_to_update["prefered_technologies"]
+    user_updated["profile_pic"] = user.profile_pic or user_to_update["profile_pic"]
 
-    return {"response": user_to_update}
+    User_conn.update_user(user_updated)
+    
+    Progresses_conn.remove_user_progress(technology.name,user_to_update['id'])
+
+    return {"response": user_updated}
 
 
 
 @app.put("/user/progress/update")
-async def UPDATE_user_update_progress(
+async def update_user_update_progress(
     progress: Progress
     ):
     
-    user_info = get_user_by_username(progress.user.username)
+    user_info = User_conn.get_user_by_username(progress.user.username)
+
+
+    if len(user_info) < 1:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
     user = user_format(user_info[0])
     user_id = user["id"]
-
-    percentage = get_user_progress_by_tech(user_id,progress.technology.name)
+ 
+    percentage = Progresses_conn.get_user_progress_by_tech(user_id,progress.technology.name)
 
     if percentage >= progress.percentage:
-        pass
+        return {"response": user}
     else:
 
-        update_user_progress(progress.percentage,user_id,progress.technology.name)
+        Progresses_conn.update_user_progress(progress.percentage,user_id,progress.technology.name)
 
-        progress_info = get_user_progress(user_id)
+        progress_info = Progresses_conn.get_user_progress(user_id)
 
         progresses = progresses_format(progress_info)
 
         user_updated = badge_identification(progresses["users_progresses"],user)
 
-        update_user(user_updated["name"],
-                        user_updated["password"], 
-                        user_updated["login_type"], 
-                        user_updated["username"], 
-                        user_updated["email"], 
-                        user_updated["badges"], 
-                        user_updated["prefered_technologies"])
+        User_conn.update_user(user_updated)
 
     return {"response": user_updated}
 
 
 
 @app.post("/questions/add")
-async def POST_questions(question: Questions):
+async def post_questions(question: Questions):
 
     if question.password != settings.QUESTIONS_PASSWORD:
         raise HTTPException(status_code=401, detail="Authorization denied")
@@ -250,23 +294,23 @@ async def POST_questions(question: Questions):
         raise HTTPException(status_code=400, detail="This question all ready exist in out data base")
 
     
-    add_questions(question)
+    Questions_conn.add_questions(question)
     
     return {"response": question}
 
 
 
 @app.get("/user/progress")
-async def GET_user_progress( username: str ):
+async def get_user_progress( username: str ):
 
-    user = get_user_by_username(username)
+    user = User_conn.get_user_by_username(username)
 
     if len(user) < 1:
         raise HTTPException(status_code=400, detail="Sorry this user does not exist")
     
     user_formated = user_format(user[0])
 
-    progresses = get_progress(user_formated)
+    progresses = Progresses_conn.get_progress(user_formated)
 
     if len(progresses) < 1:
         raise HTTPException(status_code=400, detail="Sorry this user does not have any progress")
@@ -278,9 +322,9 @@ async def GET_user_progress( username: str ):
 
 
 @app.get("/technologies")
-async def GET_technologies():
+async def get_technologies():
 
-    info = get_all_technologies()
+    info = Tech_conn.get_all_technologies()
 
     response = technologies_formating(info)    
 
@@ -290,9 +334,9 @@ async def GET_technologies():
 
 
 @app.get("/levels")
-async def GET_levels():
+async def get_levels():
 
-    info = get_all_levels()
+    info = Level_conn.get_all_levels()
 
     response = levels_formating(info)    
 
