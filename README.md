@@ -128,7 +128,7 @@ This app was created with 💚 by:
 	{
 	  "response": {
 	    "id": int,
-	    "name": "str,
+	    "name": str,
 	    "email": str,
 	    "username": str,
 	    "password": str,
