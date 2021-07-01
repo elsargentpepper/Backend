@@ -74,7 +74,7 @@ class Questions(BaseModel):
 @app.post("/users/create")
 async def post_users(user: Users):
 
-    hashed = bcrypt.hashpw(bytes(user.password, encoding='utf-8'),bcrypt.gensalt()) # THIS NEEDS TO BE A FUNCTION SOMEWHERE ELSE
+    hashed = bcrypt.hashpw(bytes(user.password, encoding='utf-8'),bcrypt.gensalt())
 
     User_conn.add_user(user.name,user.email,hashed.decode("utf-8"),user.login_type,user.username)
 
@@ -101,15 +101,6 @@ async def get_user( username: str=None,
     
     response = user_format(user[0])
 
-    return {"response": response}
-
-
-
-@app.get("/users")
-async def get_users():
-
-    users = User_conn.get_all_users()
-    response = users_format(users)
     return {"response": response}
 
 
@@ -207,7 +198,7 @@ async def post_user_technology_add(
 
     Progresses_conn.add_user_progress(technology.name,user_to_update['id'])
     
-    return {"response": user_updated}
+    return {"response": "Technology added"}
 
 
 
@@ -244,7 +235,7 @@ async def delete_user_technology_remove(
     
     Progresses_conn.remove_user_progress(technology.name,user_to_update['id'])
 
-    return {"response": user_updated}
+    return {"response": "Technology removed"}
 
 
 
@@ -265,7 +256,7 @@ async def update_user_update_progress(
     percentage = Progresses_conn.get_user_progress_by_tech(user_id,progress.technology.name)
 
     if percentage >= progress.percentage:
-        return {"response": user}
+        return {"response": "Progress updated"}
     else:
 
         Progresses_conn.update_user_progress(progress.percentage,user_id,progress.technology.name)
@@ -278,7 +269,7 @@ async def update_user_update_progress(
 
         User_conn.update_user(user_updated)
 
-    return {"response": user_updated}
+    return {"response": "Progress updated"}
 
 
 
@@ -297,7 +288,7 @@ async def post_questions(question: Questions):
      
     Questions_conn.add_questions(question)
     
-    return {"response": question}
+    return {"response": "Question added"}
 
 
 

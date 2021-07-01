@@ -43,18 +43,6 @@ def get_user_by_email(email):
     return result
 
 
-def get_all_users():
-
-    query = f"""
-    SELECT * 
-    FROM users
-    """
-
-    db.connect()
-    result = db.select_rows(query)
-    return result
-
-
 def update_user(user):
 
     query = f"""
