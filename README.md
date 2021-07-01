@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://imgur.com/4yYkmW8.png" alt="Ogma app logo" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://imgur.com/V1UvClv.png" alt="Ogma app logo" width="200"></a>
   <br>
   Ogma App Backend
   <br>
